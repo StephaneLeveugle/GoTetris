@@ -10,10 +10,16 @@ import (
 	_ "image/png"
 )
 
+const WINDOW_WIDTH = 480
+const WINDOW_HEIGHT = 480
+const GAME_WIDTH = 240
+const GAME_HEIGHT = 480
+
 // Game implements ebiten.Game interface.
 type Game struct{}
 
 var img *ebiten.Image
+var gameBackground *ebiten.Image
 
 func init() {
 	var err error
@@ -30,24 +36,39 @@ func (g *Game) Update() error {
 	return nil
 }
 
+
+
 // Draw draws the game screen.
 // Draw is called every frame (typically 1/60[s] for 60Hz display).
 func (g *Game) Draw(screen *ebiten.Image) {
-	screen.Fill(color.NRGBA{0xff, 0xff, 0xff, 0xff})
-	screen.DrawImage(img, &ebiten.DrawImageOptions{})
-	// Write your game's rendering.
+	
+	// grey background
+	screen.Fill(color.NRGBA{0x44, 0x44, 0x44, 0xff})
+
+	if img != nil {
+		gameBackground = ebiten.NewImage(GAME_WIDTH, GAME_HEIGHT)
+	}
+	gameBackground.Fill(color.NRGBA{0x00, 0x00, 0x00, 0xff});
+	gameBackgroundOptions := &ebiten.DrawImageOptions{}
+	screen.DrawImage(gameBackground, gameBackgroundOptions)
+
+	// tetromino
+	options := &ebiten.DrawImageOptions{}
+	options.GeoM.Scale(0.1, 0.1)
+	options.GeoM.Translate(GAME_WIDTH/2, 0)
+	screen.DrawImage(img, options)
 }
 
 // Layout takes the outside size (e.g., the window size) and returns the (logical) screen size.
 // If you don't have to adjust the screen size with the outside size, just return a fixed size.
-func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidthx, screenHeight int) {
-	return 640, 480
+func (g *Game) Layout(outsideWidth, outsideHeight int) (screenWidth, screenHeight int) {
+	return WINDOW_WIDTH, WINDOW_HEIGHT
 }
 
 func main() {
 	game := &Game{}
 	// Specify the window size as you like. Here, a doubled size is specified.
-	ebiten.SetWindowSize(640, 480)
+	ebiten.SetWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT)
 	ebiten.SetWindowTitle("Le super Tetris de Stété et Sysy")
 	// Call ebiten.RunGame to start your game loop.
 	if err := ebiten.RunGame(game); err != nil {
